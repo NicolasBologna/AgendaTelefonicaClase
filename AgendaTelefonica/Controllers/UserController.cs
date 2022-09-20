@@ -19,26 +19,61 @@ namespace AgendaAPI.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(_userRepository.GetAllUsers());
+            var users = _userRepository.GetAllUsers();
+            List<UserDto> usersDto = new List<UserDto>();
+            foreach (var user in users)
+            {
+                var userDto = new UserDto()
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    LastName = user.LastName,
+                    Name = user.Name
+                };
+                usersDto.Add(userDto);
+            }
+            return Ok(usersDto);
         }
 
         [HttpGet]
         [Route("{Id}")]
-        public IActionResult GetOneById(int Id)
+        public IActionResult GetOneById(int id)
         {
-            List<User> usersToReturn = _userRepository.GetAllUsers();
-            usersToReturn.Where(x => x.Id == Id).ToList();
-            if (usersToReturn.Count > 0)
-                return Ok(usersToReturn);
-            return NotFound("Usuario inexistente");
+            var user = _userRepository.GetUserById(id);
+
+            if (user is null)
+                return NotFound("Usuario inexistente");
+            return Ok(user);
         }
 
         [HttpPost]
-        public IActionResult CreateUser(UserForCreationDTO userDTO)
+        public IActionResult CreateUser(UserForCreationDTO userDto)
         {
-            _userRepository.CreateUser(userDTO);
+            var lastId = _userRepository.GetLastId();
+
+            User user = new User()
+            {
+                Name = userDto.Name,
+                Password = userDto.Password,
+                Id = lastId + 1,
+                Email = userDto.Email,
+            };
+            _userRepository.CreateUser(user);
             return NoContent();
         }
 
+        [HttpPut]
+        public IActionResult Update(UserForUpdateDto userDto)
+        {
+            User user = new User()
+            {
+                Name = userDto.Name,
+                Password = userDto.Password,
+                Id = userDto.Id,
+                Email = userDto.Email,
+            };
+            _userRepository.UpdateUser(user);
+            return NoContent();
+        }
     }
 }

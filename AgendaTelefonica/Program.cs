@@ -10,7 +10,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 #region
-builder.Services.AddTransient<UserRepository>();
+builder.Services.AddSingleton<UserRepository>();
 #endregion
 
 var app = builder.Build();
